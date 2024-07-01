@@ -2,6 +2,13 @@ import postgres from "../db/dbconnect.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/apiError.js"; 
+import fs from 'fs';
+import path from 'path';
+import csv from 'csv-parser';
+
+const countryCsv = './public/Database_country.csv';
+const cityCsv = './public/Database_city.csv';
+const airportCsv = './public/Database_airport.csv';
 
 const createTables = asyncHandler(async (req, res) => {
     try {
@@ -36,15 +43,15 @@ const createTables = asyncHandler(async (req, res) => {
                 iata_code VARCHAR(3) NOT NULL,
                 name VARCHAR(255) NOT NULL,
                 type VARCHAR(50) NOT NULL,
-                city_id INTEGER REFERENCES City(id),
-                country_id INTEGER REFERENCES Country(id),
+                city_id INTEGER NOT NULL,
+                country_id INTEGER NOT NULL,
                 continent_id INTEGER NOT NULL,
                 website_url VARCHAR(255),
                 created_at TIMESTAMP NOT NULL,
                 updated_at TIMESTAMP NOT NULL,
                 latitude_deg FLOAT NOT NULL,
                 longitude_deg FLOAT NOT NULL,
-                elevation_ft INTEGER NOT NULL,
+                elevation_ft INTEGER,
                 wikipedia_link VARCHAR(255)
             );
         `);
@@ -58,21 +65,82 @@ const createTables = asyncHandler(async (req, res) => {
             500,
             error
         );
+    } finally {
+        postgres.end();
     }
 });
 
 
+const loadCSVData = async (filePath, table, columns) => {
+    return new Promise((resolve, reject) => {
+      const results = [];
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on('data', (data) => results.push(data))
+        .on('end', async () => {
+          try {
+            // var count = 0;
+            for (const row of results) {
+                // if(count > 20){
+                //     break ;
+                // }
+                const values = columns.map(column => {
+                  let value = row[column].trim();
+                  if (value === 'NULL' || value === '') return "NULL";
+                  if (column === 'is_active') return value === 'TRUE';
+                  if (column === 'created_at' || column === 'updated_at') return `'${new Date(value).toISOString()}'`;
+                  if (column === 'id' || column === 'country_id' || column === 'mobile_code' || column === 'continent_id' || column === 'city_id' || column === 'elevation_ft') return parseInt(value); 
+                  if (column === 'lat' || column === 'long' || column === 'latitude_deg' || column === 'longitude_deg') return parseFloat(value);
+                  return `'${value}'`;
+                }).join(', ');
+
+                console.log(columns.join(', ')+" >><< "+values+"\n");
+                await postgres.query(`INSERT INTO ${table} (${columns.join(', ')}) VALUES (${values});`);
+
+                // count = count+1;
+            }
+            // await postgres.query(`
+            // INSERT INTO Airport (id, icao_code, iata_code, name, type, city_id, country_id, continent_id, website_url, created_at, updated_at, latitude_deg, longitude_deg, elevation_ft, wikipedia_link) 
+            // VALUES (10, 'PAGN', 'AGN', 'Angoon Seaplane Base', 'seaplane_base', 47874, 89, 6, NULL, '2024-06-26T18:30:00.000Z', '2024-06-26T18:30:00.000Z', 0.185278, 173.636993, 6, 'https://en.wikipedia.org/wiki/Aranuka_Airport');
+            // `);
+            
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        });
+    });
+};
+
+
 const addData = asyncHandler(async (req, res) => {
     try {
-       
+        await loadCSVData(countryCsv, 'Country', [
+            'id', 'name', 'alt_name', 'country_code_two', 'country_code_three', 'flag_app', 'mobile_code', 'continent_id', 'country_flag'
+          ]
+        );
+        
+        await loadCSVData(cityCsv, 'City', [
+            'id', 'name', 'alt_name', 'country_id', 'is_active', 'created_at', 'updated_at', 'lat', 'long'
+          ]
+        );
+
+        await loadCSVData(airportCsv, 'Airport', [
+            'id', 'icao_code', 'iata_code', 'name', 'type', 'city_id', 'country_id', 'continent_id', 'website_url', 'created_at', 'updated_at', 'latitude_deg', 'longitude_deg', 'elevation_ft', 'wikipedia_link'
+          ]
+        );
+
         return res
         .status(200)
         .json(new ApiResponse(200, {}, "Data Added successfully !!"));
     } catch (error) {
         throw new ApiError(
             500,
+            "Something went wrong while adding data !!",
             error
         );
+    } finally {
+        postgres.end();
     }
 });
 
