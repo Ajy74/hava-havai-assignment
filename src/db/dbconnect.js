@@ -1,25 +1,18 @@
 import pg from "pg";
 const { Client,Pool } = pg
 
-// const pool = new Pool({
-//     connectionString: process.env.POSTGRES_URL + "?sslmode=require",
-// })
-
-const postgres = new pg.Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'havahavaidb',
-    password: 'root',
-    port: 5432
+const postgres = new Pool({
+    connectionString: process.env.POSTGRES_URL,
 })
 
-// const postgres = new Pool({
+// const postgres = new Client({
 //     user: 'postgres',
 //     host: 'localhost',
 //     database: 'havahavaidb',
 //     password: 'root',
 //     port: 5432
 // })
+
 
 postgres.connect((err) => {
     if (err) {

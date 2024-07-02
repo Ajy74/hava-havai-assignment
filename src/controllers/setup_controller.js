@@ -57,13 +57,13 @@ const createTables = asyncHandler(async (req, res) => {
             );
         `);
 
-        postgres.end();
+        // postgres.end();
 
         return res
         .status(200)
         .json(new ApiResponse(200, {}, "Tables created successfully !!"));
     } catch (error) {
-        postgres.end();
+        // postgres.end();
 
         throw new ApiError(
             500,
@@ -77,8 +77,8 @@ const loadCSVData = async (filePath, table, columns) => {
     return new Promise(async (resolve, reject) => {
 
       //~ Fetch valid city and country IDs
-      const validCityIds = (await postgres.query('SELECT id FROM City')).rows.map(row => row.id);
-      const validCountryIds = (await postgres.query('SELECT id FROM Country')).rows.map(row => row.id);
+    //   const validCityIds = (await postgres.query('SELECT id FROM City')).rows.map(row => row.id);
+    //   const validCountryIds = (await postgres.query('SELECT id FROM Country')).rows.map(row => row.id);
 
       const results = [];
       fs.createReadStream(filePath)
@@ -86,7 +86,7 @@ const loadCSVData = async (filePath, table, columns) => {
         .on('data', (data) => results.push(data))
         .on('end', async () => {
           try {
-            // var count = 0;
+            var count = 0;
             for (const row of results) {
                 // if(count > 400){
                 //     break ;
@@ -114,11 +114,7 @@ const loadCSVData = async (filePath, table, columns) => {
 
                 // count = count+1;
             }
-            // await postgres.query(`
-            // INSERT INTO Airport (id, icao_code, iata_code, name, type, city_id, country_id, continent_id, website_url, created_at, updated_at, latitude_deg, longitude_deg, elevation_ft, wikipedia_link) 
-            // VALUES (10, 'PAGN', 'AGN', 'Angoon Seaplane Base', 'seaplane_base', 47874, 89, 6, NULL, '2024-06-26T18:30:00.000Z', '2024-06-26T18:30:00.000Z', 0.185278, 173.636993, 6, 'https://en.wikipedia.org/wiki/Aranuka_Airport');
-            // `);
-            
+
             resolve();
           } catch (error) {
             reject(error);
@@ -147,13 +143,13 @@ const addData = asyncHandler(async (req, res) => {
           ]
         );
 
-        postgres.end();
+        // postgres.end();
 
         return res
         .status(200)
         .json(new ApiResponse(200, {}, "Data Added successfully !!"));
     } catch (error) {
-        postgres.end();
+        // postgres.end();
 
         throw new ApiError(
             500,
