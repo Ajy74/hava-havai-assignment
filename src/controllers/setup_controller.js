@@ -138,10 +138,10 @@ const addData = asyncHandler(async (req, res) => {
         //   ]
         // );
 
-        await loadCSVData(airportCsv, 'Airport', [
-            'id', 'icao_code', 'iata_code', 'name', 'type', 'city_id', 'country_id', 'continent_id', 'website_url', 'created_at', 'updated_at', 'latitude_deg', 'longitude_deg', 'elevation_ft', 'wikipedia_link'
-          ]
-        );
+        // await loadCSVData(airportCsv, 'Airport', [
+        //     'id', 'icao_code', 'iata_code', 'name', 'type', 'city_id', 'country_id', 'continent_id', 'website_url', 'created_at', 'updated_at', 'latitude_deg', 'longitude_deg', 'elevation_ft', 'wikipedia_link'
+        //   ]
+        // );
 
         // postgres.end();
 
