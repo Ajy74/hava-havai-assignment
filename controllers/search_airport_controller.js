@@ -80,7 +80,7 @@ const getByIataCode = asyncHandler(async (req, res) => {
             }
         };
 
-        postgres.end();
+        // postgres.end();
        
         return res
         .status(200)
@@ -92,7 +92,7 @@ const getByIataCode = asyncHandler(async (req, res) => {
             )
         );
     } catch (error) {
-        postgres.end();
+        // postgres.end();
 
         throw new ApiError(500, "Something went wrong while fetching deatils !", error); 
     }
