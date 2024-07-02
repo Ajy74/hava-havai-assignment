@@ -1,9 +1,10 @@
 import pg from "pg";
-
+const { Client,Pool } = pg
 
 // const pool = new Pool({
 //     connectionString: process.env.POSTGRES_URL + "?sslmode=require",
 // })
+
 const postgres = new pg.Client({
     user: 'postgres',
     host: 'localhost',
@@ -12,6 +13,14 @@ const postgres = new pg.Client({
     port: 5432
 })
 
+// const postgres = new Pool({
+//     user: 'postgres',
+//     host: 'localhost',
+//     database: 'havahavaidb',
+//     password: 'root',
+//     port: 5432
+// })
+
 postgres.connect((err) => {
     if (err) {
         console.log("Error While Connecting Database- ",err);
@@ -19,5 +28,19 @@ postgres.connect((err) => {
     }
     console.log("Connect to PostgreSQL successfully!");
 })
+
+// const getClient = async () => {
+//     const client = new Client({
+//         user: 'postgres',
+//         host: 'localhost',
+//         database: 'havahavaidb',
+//         password: 'root',
+//         port: 5432
+//     });
+
+//     await client.connect();
+    
+//     return client;
+// };
 
 export default postgres;
